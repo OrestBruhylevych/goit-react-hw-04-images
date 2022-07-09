@@ -1,5 +1,10 @@
 import { Formik } from 'formik';
-import {HeaderStyled, FormStyled, InputStyled} from './Searchbar.styled'
+
+import { HeaderStyled, FormStyled, InputStyled } from './Searchbar.styled'
+
+
+
+
  
 export const Searchbar = ({onSubmit}) => {
     return (
@@ -23,7 +28,8 @@ export const Searchbar = ({onSubmit}) => {
                     autoComplete="off"
                     autoFocus
                     placeholder="Search images and photos"
-                 />
+                    />
+              
             </FormStyled>
          </Formik>
 </HeaderStyled>

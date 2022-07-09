@@ -1,4 +1,6 @@
 import { Component } from "react"
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+
 
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Searchbar } from "./Searchbar/Searchbar";
@@ -8,6 +10,7 @@ import { Button } from "./Button/Button";
 import { Loader } from "./Loader/Loader";
 
 import { AppStyled} from './App.styled';
+import { Modal } from "./Modal/Modal";
 
 
 
@@ -17,8 +20,9 @@ export class App extends Component {
     searchName: '',
     page: 1,
     items: [],
-    loader: false
-
+    openModalObject: null,
+    status: 'idle',
+    isFullImage: false
   }
 
   componentDidUpdate(_, prevState) { 
@@ -27,23 +31,76 @@ export class App extends Component {
     if (prevState.page !== this.state.page ||
       prevState.searchName !== this.state.searchName
     ) {
-      this.setState({ loader: true})
+      this.setState({ status: 'pending' })
+      
+      try {
+        getImages(searchName, page).then(({ totalImage, images }) => {
+          
+          
+          this.setState(pS => {
+            if (totalImage === 0) {
+              Notify.failure('0 result');
+              return {
+                status: 'rejected'
+              };
+            }
 
-      getImages(searchName, page).then(res => (
-        this.setState({
-          items: res,
-          loader: false})
-       ));
+            if (totalImage === pS.items.length) {
+              return {
+                isFullImage: true,
+                items: [...pS.items, ...images],
+                status: 'resolved'
+              };
+            }
+
+
+            return {
+              items: [...pS.items, ...images],
+              status: 'resolved'
+            };
+          })
+        }
+        );
+        
+      } catch (error) {
+        this.setState({ status: 'rejected' });
+      }
+      
       
     }
   } 
 
-  hendeleSubmitSearchForm = ({name}) => {
+  hendeleSubmitSearchForm = ({ name }) => {
+    const validName = name.trim()
+    if (validName === '') {
+      Notify.failure('eror');
+      return
+    }
+
+    if (this.state.searchName === validName) {
+      return;
+    }
+
     this.setState({
-      searchName: name,
+      searchName: validName,
       page: 1,
-      items: []
+      items: [],
+      openModalObject: null,
+      status: 'idle',
+      isFullImage: false
     })
+  }
+
+  hendleOpenModal = (url, alt) => {
+    const modalObject = {
+      url,
+      alt
+      }
+      this.setState({openModalObject: modalObject})
+  }
+
+  closeModal = () => {
+    this.setState({openModalObject: null})
   }
 
   loadMore = () => {
@@ -52,26 +109,62 @@ export class App extends Component {
     }))
   }
 
+  
   render() {
-    const {items, loader} = this.state;
+    const { items, openModalObject, status, isFullImage } = this.state;
 
-    return (
-      <>
-      <AppStyled>
-        <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
+    if (status === 'idle') {
+      return (
+        <AppStyled>
+          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
+        </AppStyled>
+      );
+    }
+    
+    if (status === 'pending') {
+      return (
+        <AppStyled>
+          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-        {loader && <Loader/>}
+          <ImageGallery >
+              <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
+          </ImageGallery>
 
-        <ImageGallery >
-            <ImageGalleryItem items={items}/>
-        </ImageGallery>
+          <Loader />
 
-        <Button onClick={this.loadMore}>Load More</Button>
+          {items.length !== 0 && !isFullImage  && <Button onClick={this.loadMore}>Load More</Button>}
 
-        
-      </AppStyled>
-      </>
-    );
+        </AppStyled>
+      );
+    }
+    
+    if (status === 'resolved') {
+      return (
+        <AppStyled>
+          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
+
+          <ImageGallery >
+              <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
+          </ImageGallery>
+
+          {openModalObject && <Modal image={openModalObject} closeModal={this.closeModal} />}
+
+          {items.length !== 0 && !isFullImage && <Button onClick={this.loadMore}>Load More</Button>}
+          {isFullImage && Notify.failure('Is full image')}
+
+        </AppStyled>
+      );
+    }
+
+    if (status === 'rejected') {
+      return (
+        <AppStyled>
+          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
+        </AppStyled>
+      );
+    }
+
+    
   }
   
 };
