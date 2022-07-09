@@ -1,8 +1,9 @@
-import { Formik, Form, Field } from 'formik';
+import { Formik } from 'formik';
+import {HeaderStyled, FormStyled, InputStyled} from './Searchbar.styled'
  
 export const Searchbar = ({onSubmit}) => {
     return (
-<header className="searchbar">
+<HeaderStyled className="searchbar">
             <Formik
                 initialValues={{ name: '' }}
                 onSubmit={values => {
@@ -10,12 +11,12 @@ export const Searchbar = ({onSubmit}) => {
                     onSubmit(values);
                 }}
             >
-            <Form className="form">
+            <FormStyled className="form">
                 <button type="submit" className="button">
                     <span className="button-label">Search</span>
                 </button>
 
-                <Field
+                <InputStyled
                     name='name'
                     className="input"
                     type="text"
@@ -23,8 +24,8 @@ export const Searchbar = ({onSubmit}) => {
                     autoFocus
                     placeholder="Search images and photos"
                  />
-            </Form>
+            </FormStyled>
          </Formik>
-</header>
+</HeaderStyled>
     );
 };

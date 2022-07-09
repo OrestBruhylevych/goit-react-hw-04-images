@@ -7,6 +7,8 @@ import { ImageGalleryItem } from "./ImageGalleryItem/ImageGalleryItem";
 import { Button } from "./Button/Button";
 import { Loader } from "./Loader/Loader";
 
+import { AppStyled} from './App.styled';
+
 
 
 export class App extends Component {
@@ -55,6 +57,7 @@ export class App extends Component {
 
     return (
       <>
+      <AppStyled>
         <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
         {loader && <Loader/>}
@@ -66,6 +69,7 @@ export class App extends Component {
         <Button onClick={this.loadMore}>Load More</Button>
 
         
+      </AppStyled>
       </>
     );
   }

@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { ImageGalleryStyled} from './ImageGallery.styled';
 
 
 
@@ -6,8 +7,10 @@ export class ImageGallery extends Component {
   
   
   render() {
-    return (<ul className="gallery">
-      {this.props.children}
-    </ul>);
+    return (
+      <ImageGalleryStyled className="gallery">
+          {this.props.children}
+      </ImageGalleryStyled>
+    );
   }
 };
