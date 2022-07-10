@@ -20,7 +20,6 @@ export const HeaderStyled = styled.header`
     0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
 `;
 
-
 export const FormStyled = styled(Form)`
   display: flex;
   align-items: center;
@@ -45,7 +44,7 @@ export const FormStyled = styled(Form)`
     outline: none;
 
     :hover {
-     opacity: 1;
+      opacity: 1;
     }
   }
 
@@ -60,9 +59,7 @@ export const FormStyled = styled(Form)`
     clip-path: inset(50%);
     border: 0;
   }
-
 `;
-
 
 export const InputStyled = styled(Field)`
   display: inline-block;
@@ -75,12 +72,7 @@ export const InputStyled = styled(Field)`
   padding-right: 4px;
 
   ::placeholder {
-  font: inherit;
-  font-size: 18px;
-}
+    font: inherit;
+    font-size: 18px;
+  }
 `;
-
-
-
-
-

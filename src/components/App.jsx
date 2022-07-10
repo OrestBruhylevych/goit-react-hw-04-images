@@ -1,49 +1,42 @@
-import { Component } from "react"
+import { Component } from 'react';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-
-import { ImageGallery } from "./ImageGallery/ImageGallery";
-import { Searchbar } from "./Searchbar/Searchbar";
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Searchbar } from './Searchbar/Searchbar';
 import { getImages } from '../services/api';
-import { ImageGalleryItem } from "./ImageGalleryItem/ImageGalleryItem";
-import { Button } from "./Button/Button";
-import { Loader } from "./Loader/Loader";
+import { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
+import { Button } from './Button/Button';
+import { Loader } from './Loader/Loader';
 
-import { AppStyled, ErrorStyled} from './App.styled';
-import { Modal } from "./Modal/Modal";
-
-
+import { AppStyled, ErrorStyled } from './App.styled';
+import { Modal } from './Modal/Modal';
 
 export class App extends Component {
-
-
   state = {
     searchName: '',
     page: 1,
     items: [],
     openModalObject: null,
     status: 'idle',
-    isFullImage: false
-  }
+    isFullImage: false,
+  };
 
-
-  componentDidUpdate(_, prevState) { 
+  componentDidUpdate(_, prevState) {
     const { searchName, page } = this.state;
 
-    if (prevState.page !== this.state.page ||
+    if (
+      prevState.page !== this.state.page ||
       prevState.searchName !== this.state.searchName
     ) {
-      this.setState({ status: 'pending' })
-      
+      this.setState({ status: 'pending' });
+
       try {
         getImages(searchName, page).then(({ totalImage, images }) => {
-          
-          
           this.setState(pS => {
             if (totalImage === 0) {
               Notify.failure('Nothing found');
               return {
-                status: 'rejected'
+                status: 'rejected',
               };
             }
 
@@ -51,32 +44,27 @@ export class App extends Component {
               return {
                 isFullImage: true,
                 items: [...pS.items, ...images],
-                status: 'resolved'
+                status: 'resolved',
               };
             }
 
-
             return {
               items: [...pS.items, ...images],
-              status: 'resolved'
+              status: 'resolved',
             };
-          })
-        }
-        );
-        
+          });
+        });
       } catch (error) {
         this.setState({ status: 'rejected' });
       }
-      
-      
     }
-  } 
+  }
 
   hendeleSubmitSearchForm = ({ name }) => {
-    const validName = name.trim()
+    const validName = name.trim();
     if (validName === '') {
       Notify.failure('The search field must be filled');
-      return
+      return;
     }
 
     if (this.state.searchName === validName) {
@@ -89,29 +77,28 @@ export class App extends Component {
       items: [],
       openModalObject: null,
       status: 'idle',
-      isFullImage: false
-    })
-  }
+      isFullImage: false,
+    });
+  };
 
   hendleOpenModal = (url, alt) => {
     const modalObject = {
       url,
-      alt
-      }
-      this.setState({openModalObject: modalObject})
-  }
+      alt,
+    };
+    this.setState({ openModalObject: modalObject });
+  };
 
   closeModal = () => {
-    this.setState({openModalObject: null})
-  }
+    this.setState({ openModalObject: null });
+  };
 
   loadMore = () => {
     this.setState(pS => ({
-      page: pS.page + 1
-    }))
-  }
+      page: pS.page + 1,
+    }));
+  };
 
-  
   render() {
     const { items, openModalObject, status, isFullImage } = this.state;
 
@@ -122,39 +109,42 @@ export class App extends Component {
         </AppStyled>
       );
     }
-    
+
     if (status === 'pending') {
       return (
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery >
-              <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
+          <ImageGallery>
+            <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
           </ImageGallery>
 
           <Loader />
 
-          {items.length !== 0 && !isFullImage  && <Button onClick={this.loadMore}>Load More</Button>}
-
+          {items.length !== 0 && !isFullImage && (
+            <Button onClick={this.loadMore}>Load More</Button>
+          )}
         </AppStyled>
       );
     }
-    
+
     if (status === 'resolved') {
       return (
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery >
-              <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
+          <ImageGallery>
+            <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
           </ImageGallery>
 
-          {openModalObject && <Modal image={openModalObject} closeModal={this.closeModal} />}
+          {openModalObject && (
+            <Modal image={openModalObject} closeModal={this.closeModal} />
+          )}
 
-          {items.length !== 0 && !isFullImage && <Button onClick={this.loadMore}>Load More</Button>}
+          {items.length !== 0 && !isFullImage && (
+            <Button onClick={this.loadMore}>Load More</Button>
+          )}
           {isFullImage && <ErrorStyled>These are all images</ErrorStyled>}
-            
-
         </AppStyled>
       );
     }
@@ -167,8 +157,5 @@ export class App extends Component {
         </AppStyled>
       );
     }
-
-    
   }
-  
-};
+}

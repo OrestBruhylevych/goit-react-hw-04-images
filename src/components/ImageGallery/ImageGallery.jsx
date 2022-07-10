@@ -1,18 +1,7 @@
+import { ImageGalleryStyled } from './ImageGallery.styled';
 
-
-import { ImageGalleryStyled} from './ImageGallery.styled';
-
-
-
-export const ImageGallery =({children}) => {
-  
-  
-  
-    return (
-      <ImageGalleryStyled className="gallery">
-          {children}
-      </ImageGalleryStyled>
-    );
-  
+export const ImageGallery = ({ children }) => {
+  return (
+    <ImageGalleryStyled className="gallery">{children}</ImageGalleryStyled>
+  );
 };
-
