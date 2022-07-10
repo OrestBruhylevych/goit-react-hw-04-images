@@ -9,12 +9,13 @@ import { ImageGalleryItem } from "./ImageGalleryItem/ImageGalleryItem";
 import { Button } from "./Button/Button";
 import { Loader } from "./Loader/Loader";
 
-import { AppStyled} from './App.styled';
+import { AppStyled, ErrorStyled} from './App.styled';
 import { Modal } from "./Modal/Modal";
 
 
 
 export class App extends Component {
+
 
   state = {
     searchName: '',
@@ -24,6 +25,7 @@ export class App extends Component {
     status: 'idle',
     isFullImage: false
   }
+
 
   componentDidUpdate(_, prevState) { 
     const { searchName, page } = this.state;
@@ -39,7 +41,7 @@ export class App extends Component {
           
           this.setState(pS => {
             if (totalImage === 0) {
-              Notify.failure('0 result');
+              Notify.failure('Nothing found');
               return {
                 status: 'rejected'
               };
@@ -73,7 +75,7 @@ export class App extends Component {
   hendeleSubmitSearchForm = ({ name }) => {
     const validName = name.trim()
     if (validName === '') {
-      Notify.failure('eror');
+      Notify.failure('The search field must be filled');
       return
     }
 
@@ -150,7 +152,8 @@ export class App extends Component {
           {openModalObject && <Modal image={openModalObject} closeModal={this.closeModal} />}
 
           {items.length !== 0 && !isFullImage && <Button onClick={this.loadMore}>Load More</Button>}
-          {isFullImage && Notify.failure('Is full image')}
+          {isFullImage && <ErrorStyled>These are all images</ErrorStyled>}
+            
 
         </AppStyled>
       );
@@ -160,6 +163,7 @@ export class App extends Component {
       return (
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
+          <ErrorStyled>Try again ...</ErrorStyled>
         </AppStyled>
       );
     }

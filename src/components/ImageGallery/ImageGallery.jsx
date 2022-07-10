@@ -1,16 +1,18 @@
-import { Component } from "react";
+
+
 import { ImageGalleryStyled} from './ImageGallery.styled';
 
 
 
-export class ImageGallery extends Component {
+export const ImageGallery =({children}) => {
   
   
-  render() {
+  
     return (
       <ImageGalleryStyled className="gallery">
-          {this.props.children}
+          {children}
       </ImageGalleryStyled>
     );
-  }
+  
 };
+

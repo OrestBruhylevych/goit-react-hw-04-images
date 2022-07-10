@@ -1,10 +1,17 @@
 import { Component } from "react";
+import PropTypes from 'prop-types';
+
 import {OverlayStyled, ModalStyled } from './Modal.styled';
 
 
 
 
 export class Modal extends Component {
+
+    static propTypes = {
+    image: PropTypes.object.isRequired,
+    closeModal: PropTypes.func.isRequired
+  };
 
     componentDidMount() {
         document.addEventListener('keydown', this.addLisetenerEsc);
