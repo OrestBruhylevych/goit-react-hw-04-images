@@ -4,7 +4,6 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
 import { getImages } from '../services/api';
-import { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 
@@ -32,7 +31,7 @@ export class App extends Component {
 
       try {
         getImages(searchName, page).then(({ totalImage, images }) => {
-          this.setState(pS => {
+          this.setState(prevState => {
             if (totalImage === 0) {
               Notify.failure('Nothing found');
               return {
@@ -40,16 +39,16 @@ export class App extends Component {
               };
             }
 
-            if (totalImage === pS.items.length) {
+            if (totalImage === prevState.items.length) {
               return {
                 isFullImage: true,
-                items: [...pS.items, ...images],
+                items: [...prevState.items, ...images],
                 status: 'resolved',
               };
             }
 
             return {
-              items: [...pS.items, ...images],
+              items: [...prevState.items, ...images],
               status: 'resolved',
             };
           });
@@ -68,6 +67,7 @@ export class App extends Component {
     }
 
     if (this.state.searchName === validName) {
+      Notify.failure('Replace the search term');
       return;
     }
 
@@ -94,8 +94,8 @@ export class App extends Component {
   };
 
   loadMore = () => {
-    this.setState(pS => ({
-      page: pS.page + 1,
+    this.setState(prevState => ({
+      page: prevState.page + 1,
     }));
   };
 
@@ -115,10 +115,8 @@ export class App extends Component {
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery>
-            <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
-          </ImageGallery>
-
+          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal}/>
+          
           <Loader />
 
           {items.length !== 0 && !isFullImage && (
@@ -133,9 +131,8 @@ export class App extends Component {
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery>
-            <ImageGalleryItem items={items} onClick={this.hendleOpenModal} />
-          </ImageGallery>
+          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal}/>
+
 
           {openModalObject && (
             <Modal image={openModalObject} closeModal={this.closeModal} />
