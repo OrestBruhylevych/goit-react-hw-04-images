@@ -115,8 +115,8 @@ export class App extends Component {
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal}/>
-          
+          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
+
           <Loader />
 
           {items.length !== 0 && !isFullImage && (
@@ -131,8 +131,7 @@ export class App extends Component {
         <AppStyled>
           <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
 
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal}/>
-
+          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
 
           {openModalObject && (
             <Modal image={openModalObject} closeModal={this.closeModal} />
@@ -141,6 +140,7 @@ export class App extends Component {
           {items.length !== 0 && !isFullImage && (
             <Button onClick={this.loadMore}>Load More</Button>
           )}
+
           {isFullImage && <ErrorStyled>These are all images</ErrorStyled>}
         </AppStyled>
       );
