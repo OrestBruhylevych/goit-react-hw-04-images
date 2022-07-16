@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -10,149 +10,147 @@ import { Loader } from './Loader/Loader';
 import { AppStyled, ErrorStyled } from './App.styled';
 import { Modal } from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    searchName: '',
-    page: 1,
-    items: [],
-    openModalObject: null,
-    status: 'idle',
-    isFullImage: false,
-  };
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
-  componentDidUpdate(_, prevState) {
-    const { searchName, page } = this.state;
+export const App = () => {
+  const [searchName, setSearchName] = useState('');
+  const [page, setPage] = useState(1);
+  const [items, setItems] = useState([]);
+  const [openModalObject, setOpenModalObject] = useState(null);
+  const [status, setStatus] = useState(Status.IDLE);
+  const [isFullImage, setIsFullImage] = useState(false);
 
-    if (
-      prevState.page !== this.state.page ||
-      prevState.searchName !== this.state.searchName
-    ) {
-      this.setState({ status: 'pending' });
-
-      try {
-        getImages(searchName, page).then(({ totalImage, images }) => {
-          this.setState(prevState => {
-            if (totalImage === 0) {
-              Notify.failure('Nothing found');
-              return {
-                status: 'rejected',
-              };
-            }
-
-            if (totalImage === prevState.items.length) {
-              return {
-                isFullImage: true,
-                items: [...prevState.items, ...images],
-                status: 'resolved',
-              };
-            }
-
-            return {
-              items: [...prevState.items, ...images],
-              status: 'resolved',
-            };
-          });
-        });
-      } catch (error) {
-        this.setState({ status: 'rejected' });
-      }
+  useEffect(() => {
+    if (searchName === '') {
+      return;
     }
-  }
 
-  hendeleSubmitSearchForm = ({ name }) => {
+    setStatus(Status.PENDING);
+
+    try {
+      getImages(searchName, page).then(({ totalImage, images }) => {
+        if (totalImage === 0) {
+          Notify.failure('Nothing found');
+          setStatus(Status.REJECTED);
+          return;
+        }
+
+        setItems(prevState => {
+          if (totalImage === prevState.length) {
+            setIsFullImage(true);
+            setItems([...prevState, ...images]);
+            setStatus(Status.RESOLVED);
+
+            return;
+          }
+
+          if (page > 1) {
+            const { height: cardHeight } = document
+              .querySelector('.gallery')
+              .firstElementChild.getBoundingClientRect();
+
+            window.scrollBy({
+              top: cardHeight * 2,
+              behavior: 'smooth',
+            });
+          }
+
+          setItems([...prevState, ...images]);
+          setStatus(Status.RESOLVED);
+
+          return;
+        });
+      });
+    } catch (error) {
+      setStatus(Status.REJECTED);
+    }
+  }, [page, searchName]);
+
+  const hendeleSubmitSearchForm = ({ name }) => {
     const validName = name.trim();
     if (validName === '') {
       Notify.failure('The search field must be filled');
       return;
     }
 
-    if (this.state.searchName === validName) {
+    if (searchName === validName) {
       Notify.failure('Replace the search term');
       return;
     }
 
-    this.setState({
-      searchName: validName,
-      page: 1,
-      items: [],
-      openModalObject: null,
-      status: 'idle',
-      isFullImage: false,
-    });
+    setSearchName(validName);
+    setPage(1);
+    setItems([]);
+    setOpenModalObject(null);
+    setStatus(status.IDLE);
+    setIsFullImage(false);
   };
 
-  hendleOpenModal = (url, alt) => {
+  const hendleOpenModal = (url, alt) => {
     const modalObject = {
       url,
       alt,
     };
-    this.setState({ openModalObject: modalObject });
+    setOpenModalObject(modalObject);
   };
 
-  closeModal = () => {
-    this.setState({ openModalObject: null });
+  const closeModal = () => {
+    setOpenModalObject(null);
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const loadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { items, openModalObject, status, isFullImage } = this.state;
-
-    if (status === 'idle') {
-      return (
-        <AppStyled>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-        </AppStyled>
-      );
-    }
-
-    if (status === 'pending') {
-      return (
-        <AppStyled>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
-
-          <Loader />
-
-          {items.length !== 0 && !isFullImage && (
-            <Button onClick={this.loadMore}>Load More</Button>
-          )}
-        </AppStyled>
-      );
-    }
-
-    if (status === 'resolved') {
-      return (
-        <AppStyled>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-
-          <ImageGallery items={items} hendleOpenModal={this.hendleOpenModal} />
-
-          {openModalObject && (
-            <Modal image={openModalObject} closeModal={this.closeModal} />
-          )}
-
-          {items.length !== 0 && !isFullImage && (
-            <Button onClick={this.loadMore}>Load More</Button>
-          )}
-
-          {isFullImage && <ErrorStyled>These are all images</ErrorStyled>}
-        </AppStyled>
-      );
-    }
-
-    if (status === 'rejected') {
-      return (
-        <AppStyled>
-          <Searchbar onSubmit={this.hendeleSubmitSearchForm} />
-          <ErrorStyled>Try again ...</ErrorStyled>
-        </AppStyled>
-      );
-    }
+  if (status === Status.IDLE) {
+    return (
+      <AppStyled>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+      </AppStyled>
+    );
   }
-}
+
+  if (status === Status.PENDING) {
+    return (
+      <AppStyled>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+
+        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+
+        <Loader />
+      </AppStyled>
+    );
+  }
+
+  if (status === Status.RESOLVED) {
+    return (
+      <AppStyled>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+
+        <ImageGallery items={items} hendleOpenModal={hendleOpenModal} />
+
+        {openModalObject && (
+          <Modal image={openModalObject} closeModal={closeModal} />
+        )}
+
+        {!isFullImage && <Button onClick={loadMore}>Load More</Button>}
+
+        {isFullImage && <ErrorStyled>These are all images</ErrorStyled>}
+      </AppStyled>
+    );
+  }
+
+  if (status === Status.REJECTED) {
+    return (
+      <AppStyled>
+        <Searchbar onSubmit={hendeleSubmitSearchForm} />
+        <ErrorStyled>Try again ...</ErrorStyled>
+      </AppStyled>
+    );
+  }
+};

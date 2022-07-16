@@ -1,46 +1,41 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { OverlayStyled, ModalStyled } from './Modal.styled';
 
-export class Modal extends Component {
-  static propTypes = {
-    image: PropTypes.object.isRequired,
-    closeModal: PropTypes.func.isRequired,
-  };
+export const Modal = ({ image, closeModal }) => {
+  const { url, alt } = image;
 
-  componentDidMount() {
-    document.addEventListener('keydown', this.addLisetenerEsc);
-  }
+  useEffect(() => {
+    const addLisetenerEsc = e => {
+      if (e.code === 'Escape') {
+        closeModal();
+      }
+    };
 
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.addLisetenerEsc);
-  }
+    document.addEventListener('keydown', addLisetenerEsc);
 
-  addLisetenerEsc = e => {
-    const { closeModal } = this.props;
-    if (e.code === 'Escape') {
-      closeModal();
-    }
-  };
+    return () => {
+      document.removeEventListener('keydown', addLisetenerEsc);
+    };
+  }, [closeModal]);
 
-  onOverlayClick = e => {
-    const { closeModal } = this.props;
+  const onOverlayClick = e => {
     if (e.target === e.currentTarget) {
       closeModal();
     }
   };
 
-  render() {
-    const { image } = this.props;
-    const { url, alt } = image;
+  return (
+    <OverlayStyled className="overlay" onClick={onOverlayClick}>
+      <ModalStyled className="modal">
+        <img src={url} alt={alt} />
+      </ModalStyled>
+    </OverlayStyled>
+  );
+};
 
-    return (
-      <OverlayStyled className="overlay" onClick={this.onOverlayClick}>
-        <ModalStyled className="modal">
-          <img src={url} alt={alt} />
-        </ModalStyled>
-      </OverlayStyled>
-    );
-  }
-}
+Modal.propTypes = {
+  image: PropTypes.object.isRequired,
+  closeModal: PropTypes.func.isRequired,
+};
